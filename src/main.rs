@@ -21,7 +21,7 @@ fn main() {
         buf.clear();
         if new_prompt {
             query.clear();
-            print!("\nnaadan-# ");
+            print!("naadan-# ");
             io::stdout().flush().unwrap();
         }
 
@@ -33,10 +33,17 @@ fn main() {
 
         if buf.ends_with("\\\n") {
             query.push_str(&buf.strip_suffix("\\\n").unwrap());
+            query = query.trim().to_string();
             new_prompt = false;
         } else {
             query.push_str(&buf.strip_suffix("\n").unwrap());
-            //println!("Output is {:?}", query);
+            query = query.trim().to_string();
+
+            // println!("Query: {:?}", query);
+            if query.len() == 0 {
+                continue;
+            }
+
             new_prompt = true;
 
             let mut stream: TcpStream;
@@ -49,9 +56,11 @@ fn main() {
             }
 
             let output_buf = query_db(&mut query, &mut stream);
-            println!("------------------------------------ Query result ------------------------------------");
-            println!("{}", output_buf);
-            println!("------------------------------------              ------------------------------------");
+            if output_buf.len() > 0 {
+                println!("--------------------- Query result ---------------------");
+                println!("{}", output_buf);
+                println!("--------------------------------------------------------");
+            }
         }
     }
 }
